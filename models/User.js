@@ -54,6 +54,7 @@ const userSchema = new Schema({
     enum: ['actif', 'banni'],
     default: 'actif',
   },
+  posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
 
 userSchema

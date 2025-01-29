@@ -90,6 +90,10 @@ const postSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  Reviews: {
+    type: Schema.Types.ObjectId,
+    ref: 'Review',
+  },
 });
 
 const Post = mongoose.model('Post', postSchema);

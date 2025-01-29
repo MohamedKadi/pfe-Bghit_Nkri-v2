@@ -22,11 +22,6 @@ const reviewSchema = new Schema({
     ref: 'User',
     required: [true, "L'utilisateur est obligatoire"],
   },
-  postId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post',
-    required: [true, 'Le post est obligatoire'],
-  },
 });
 
 const Review = mongoose.model('Review', reviewSchema);
