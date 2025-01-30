@@ -2,7 +2,7 @@ const { isValidObjectId } = require('mongoose');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
-exports.getAll = async (req, res, next) => {
+exports.getAllPublished = async (req, res, next) => {
   try {
     const {
       location,
@@ -15,7 +15,6 @@ exports.getAll = async (req, res, next) => {
       bathrooms,
       furnished,
       amenties,
-      status,
       startDate,
       endDate,
       sort,
@@ -37,7 +36,8 @@ exports.getAll = async (req, res, next) => {
     if (bathrooms) filterObject.bathrooms = Number(bathrooms);
     if (furnished) filterObject.furnished = furnished === 'true';
     if (amenties) filterObject.amenties = { $all: amenties.split(', ') };
-    if (status) filterObject.status = status;
+
+    filterObject.status = 'published';
 
     if (startDate) filterObject.dateCreated.$gte = new Date(startDate);
     if (endDate) filterObject.dateCreated.$lte = new Date(endDate);
@@ -59,7 +59,8 @@ exports.getAll = async (req, res, next) => {
     const posts = await Post.find(filterObject)
       .sort(sortObject)
       .skip(skip)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate('Reviews');
 
     res.status(200).json({
       length: posts.length,
@@ -86,7 +87,9 @@ exports.getOne = async (req, res, next) => {
       return next(IdError);
     }
 
-    const post = await Post.findOne({ _id: id });
+    const post = await Post.findOne({ _id: id, status: 'published' }).populate(
+      'Reviews'
+    );
     res.status(200).json({
       data: post,
     });
@@ -95,11 +98,52 @@ exports.getOne = async (req, res, next) => {
   }
 };
 //posts for a specific user
-exports.getAllUser = async (req, res, next) => {
+exports.getAllPublishedUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id).populate('posts');
-    // const selectedPosts = await posts.populate('posts');
+    if (id === req.user._id) {
+      return exports.getAllSpecificUser(req, res, next);
+    }
+    const user = await User.findById(id).populate({
+      path: 'posts',
+      match: { status: 'published' },
+    });
+    res.status(200).json({
+      postsLength: user.posts.length,
+      //data: user,
+      posts: user.posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+//get posts of the current user soit kant published ola draft ola rejected etc
+exports.getAllSpecificUser = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    let { status } = req.query;
+    if (!status) {
+      status = 'published';
+    }
+    const statusArray = [
+      'draft',
+      'published',
+      'archived',
+      'pending_approval',
+      'rejected',
+    ];
+    if (!statusArray.includes(status)) {
+      const statusError = new Error(
+        'statusError you should only chose the choices that you have'
+      );
+      statusError.status = 'fail to get the posts';
+      statusError.statusCode = 400;
+      return next(statusError);
+    }
+    const user = await User.findById(_id).populate({
+      path: 'posts',
+      match: { status },
+    });
     res.status(200).json({
       postsLength: user.posts.length,
       //data: user,
@@ -129,6 +173,11 @@ exports.createOne = async (req, res, next) => {
       contact_info,
     } = req.body;
     const { _id } = req.user;
+
+    if (status && (status === 'published' || status === 'rejected')) {
+      published = 'pending_approval';
+    }
+
     const post = await Post.create({
       title,
       description,
@@ -147,7 +196,7 @@ exports.createOne = async (req, res, next) => {
       createdBy: _id,
     });
     req.user.posts.push(post._id);
-    const user = await req.user.save();
+    await req.user.save();
 
     res.status(201).json({
       post: post,

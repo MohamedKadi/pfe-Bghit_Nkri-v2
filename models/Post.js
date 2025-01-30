@@ -95,10 +95,12 @@ const postSchema = new Schema({
     ref: 'Review',
     required: [true, 'the user is necessary for the post'],
   },
-  Reviews: {
-    type: Schema.Types.ObjectId,
-    ref: 'Review',
-  },
+  Reviews: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Review',
+    },
+  ],
 });
 
 const Post = mongoose.model('Post', postSchema);

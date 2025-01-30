@@ -54,6 +54,11 @@ const userSchema = new Schema({
     enum: ['actif', 'banni'],
     default: 'actif',
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
 
