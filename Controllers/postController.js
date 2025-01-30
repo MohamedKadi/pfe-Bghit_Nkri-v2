@@ -14,7 +14,7 @@ exports.getAll = async (req, res, next) => {
       bedrooms,
       bathrooms,
       furnished,
-      amenities,
+      amenties,
       status,
       startDate,
       endDate,
@@ -36,11 +36,11 @@ exports.getAll = async (req, res, next) => {
     if (bedrooms) filterObject.bedrooms = Number(bedrooms);
     if (bathrooms) filterObject.bathrooms = Number(bathrooms);
     if (furnished) filterObject.furnished = furnished === 'true';
-    if (amenities) filterObject.amenities = { $all: amenities.split(', ') };
-    if (status) filter.status = status;
+    if (amenties) filterObject.amenties = { $all: amenties.split(', ') };
+    if (status) filterObject.status = status;
 
-    if (startDate) filter.dateCreated.$gte = new Date(startDate);
-    if (endDate) filter.dateCreated.$lte = new Date(endDate);
+    if (startDate) filterObject.dateCreated.$gte = new Date(startDate);
+    if (endDate) filterObject.dateCreated.$lte = new Date(endDate);
 
     const sortObject = {};
     if (sort) {
@@ -151,6 +151,56 @@ exports.createOne = async (req, res, next) => {
 
     res.status(201).json({
       post: post,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateOne = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      location,
+      price,
+      imageUrls,
+      availability,
+      house_type,
+      maxPersons,
+      bedrooms,
+      bathrooms,
+      furnished,
+      amenties,
+      status,
+      contact_info,
+    } = req.body;
+
+    const updatedObject = {};
+    if (title) updatedObject.title = title;
+    if (description) updatedObject.description = description;
+    if (location) updatedObject.location = location.toLowerCasse();
+    if (price) updatedObject.price = Number(minPrice);
+    if (imageUrls) updatedObject.imageUrls = imageUrls;
+    if (house_type) updatedObject.house_type = house_type;
+    if (availability) updatedObject.availability = availability === 'true';
+    if (maxPersons) updatedObject.maxPersons = Number(maxPersons);
+    if (bedrooms) updatedObject.bedrooms = Number(bedrooms);
+    if (bathrooms) updatedObject.bathrooms = Number(bathrooms);
+    if (furnished) updatedObject.furnished = furnished === 'true';
+    if (amenties) updatedObject.amenities = amenties;
+    if (status) updatedObject.status = status;
+    if (contact_info) updatedObject.contact_info = contact_info;
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.user._id,
+      updatedObject,
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: 'updated successfully',
+      updatedPost: updatedPost,
     });
   } catch (error) {
     next(error);
