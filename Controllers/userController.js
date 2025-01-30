@@ -16,7 +16,13 @@ exports.getAll = async (req, res, next) => {
 exports.getOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id).select(
+    if (!id) {
+      const noIdError = new Error('No id provided for the user');
+      noIdError.status = 'fail to get the user without the id';
+      noIdError.statusCode = 401;
+      return next(noIdError);
+    }
+    const user = await User.findOne({ _id: id }).select(
       '-_id name email isVerified dateCreated'
     );
     if (!user) {

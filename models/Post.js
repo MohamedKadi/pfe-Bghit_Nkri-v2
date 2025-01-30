@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
@@ -19,9 +19,9 @@ const postSchema = new Schema({
     type: String,
     validate: {
       validator: function (value) {
-        return value > 100;
+        return value.length > 50;
       },
-      message: "Post description should have at least 100 character's",
+      message: "Post description should have at least 50 character's",
     },
     required: [true, 'Post should have a description'],
   },

@@ -19,6 +19,7 @@ async function connect() {
 
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
+const postRoutes = require('./routes/postRoutes');
 const errorController = require('./Controllers/errorController');
 
 app.use(express.json()); // for parsing application/json
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.use(morgan('dev'));
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/posts', postRoutes);
 
 app.use('*', (req, res, next) => {
   const err = new Error(`Can't find ${req.baseUrl} on this server!`);
