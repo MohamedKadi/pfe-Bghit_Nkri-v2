@@ -1,3 +1,4 @@
+const { isValidObjectId } = require('mongoose');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
@@ -78,6 +79,13 @@ exports.getOne = async (req, res, next) => {
       noIdError.statusCode = 401;
       return next(noIdError);
     }
+    if (!isValidObjectId(id)) {
+      const IdError = new Error('not found this post');
+      IdError.status = 'this post id does not exists';
+      IdError.statusCode = 404;
+      return next(IdError);
+    }
+
     const post = await Post.findOne({ _id: id });
     res.status(200).json({
       data: post,
@@ -96,6 +104,53 @@ exports.getAllUser = async (req, res, next) => {
       postsLength: user.posts.length,
       //data: user,
       posts: user.posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+//creating a post
+exports.createOne = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      location,
+      price,
+      imageUrls,
+      availability,
+      house_type,
+      maxPersons,
+      bedrooms,
+      bathrooms,
+      furnished,
+      amenties,
+      status,
+      contact_info,
+    } = req.body;
+    const { _id } = req.user;
+    const post = await Post.create({
+      title,
+      description,
+      location,
+      price,
+      imageUrls,
+      availability,
+      house_type,
+      maxPersons,
+      bedrooms,
+      bathrooms,
+      furnished,
+      amenties,
+      status,
+      contact_info,
+      createdBy: _id,
+    });
+    req.user.posts.push(post._id);
+    const user = await req.user.save();
+
+    res.status(201).json({
+      post: post,
     });
   } catch (error) {
     next(error);

@@ -90,6 +90,11 @@ const postSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'Review',
+    required: [true, 'the user is necessary for the post'],
+  },
   Reviews: {
     type: Schema.Types.ObjectId,
     ref: 'Review',
