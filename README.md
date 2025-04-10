@@ -1,6 +1,6 @@
 # Rental Housing Platform API
 
-A Node.js backend API for a rental housing platform that enables users to list properties, search for rentals, leave reviews, and manage their accounts. The platform includes an administrative system for content moderation and user management.
+A Node.js backend API for a rental housing platform that enables users to list properties, search for rentals, leave reviews, and manage their accounts.
 
 ## Features
 
